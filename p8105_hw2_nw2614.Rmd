@@ -29,4 +29,51 @@ subway_df =
   )
 ```
 
+This dataset contains data about NYC subway transit lines. The variables include line, station_name, station_latitude, station_longitude, route 1, route 2, route 3, route 4, route 5, route 6, route 7, route 8, route 9, route 10, route 11, entry, entrance_type, vending, and ada. These variables describe the station line, the station name, where the station is situated on a map, the 11 different routes, vending information, and information about the station entrances, and ADA compliance. 
+
+There were originally other variables in the dataset. I only selected the variables required, and left out the other variables from the final data frame. Some of the variables that were cleaned out included information about division of the stations, staffing hours, and station exit only information. After extracting and cleaning the variables of interest, there are 1868 rows and 32 columns in this data frame. I also recoded the entry variable from a character (YES/NO) variable into a logical (TRUE/FALSE) variable. 
+
+No, the original data import is not tidy. The `route1` through `route11` variables are all in separate columns instead of being within one column but separated by row. This means that these columns are values and not variable names. 
+
+How many distinct stations are there? Note that stations are identified both by name and by line (e.g. 125th St 8th Avenue; 125st Broadway; 125st Lenox); the distinct function may be useful here.
+
+
+```{r}
+subway_df |>
+  distinct(line, station_name) |>
+  nrow()
+```
+
+There are 465 distinct stations. 
+
+How many stations are ADA compliant?
+```{r}
+subway_df |>
+  filter(ada == TRUE) |>
+  distinct(line, station_name) |>
+  nrow() 
+```
+
+There are 84 stations that are ADA compliant. 
+
+What proportion of station entrances / exits without vending allow entrance?
+
+```{r}
+subway_df |> 
+  filter(vending == "NO") |>
+  nrow()
+
+subway_df |> 
+  filter(entry == TRUE, vending == "NO") |>
+  nrow()
+  
+```
+
+There are 183 stations without vending. Out of these 183 stations, 69 stations allow entrance. 
+
+
+Reformat data so that route number and route name are distinct variables. How many distinct stations serve the A train? Of the stations that serve the A train, how many are ADA compliant?
+
+
+
 
