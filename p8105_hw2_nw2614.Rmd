@@ -5,3 +5,28 @@ date: "2026-10-04"
 output: github_document
 ---
 
+Load Packages
+```{r}
+library(tidyverse)
+```
+
+# Problem 1 
+
+Importing CSV File
+
+```{r}
+subway_df = 
+  read_csv(file = "data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
+           na = c("", "NA", ".")) |> 
+  janitor::clean_names() |>
+  select(line, station_name, station_latitude, station_longitude, route1:route11, entry, entrance_type, vending, ada) |>
+  mutate(
+    entry = recode_values(
+      entry, 
+      "YES" ~ TRUE,
+      "NO" ~ FALSE
+    )
+  )
+```
+
+
