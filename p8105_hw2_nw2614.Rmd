@@ -164,9 +164,9 @@ The total number of cigarette butts collected by Gwynda in June of 2022 is `r tr
 
 # Problem 3
 
-Import, clean, and tidy the dataset of baseline characteristics for Problem 3. 
+Import, clean, and tidy the dataset of baseline characteristics for Problem 3:
 
-```{r}
+```{r, message = F}
 MCI_baseline_df = 
   read_csv(
     file = "data/MCI_baseline.csv",
@@ -176,8 +176,8 @@ MCI_baseline_df =
   janitor::clean_names() |>
   mutate(
     sex = recode(sex, `1` = "Male", `0` = "Female"),
-    apoe4 = recode(apoe4, `1` = "APOE4 carrier", `0` = "APOE4 non-carrier")) |>
-  filter(is.na(age_at_onset) | age_at_onset>current_age) 
+    apoe4 = recode(apoe4, `1` = "APOE4_carrier", `0` = "APOE4_non-carrier")) |>
+  filter(is.na(age_at_onset) | age_at_onset > current_age) 
 ```
 
 I imported the CSV file into R Studio. I then skipped the first line of the CSV file since it was details about the codebook. Then, I standardized the NA variables. I then re coded the `sex` and `apoe4` variables from numeric into character variables based on the codebook provided in line 1 of the CSV file. To ensure that participants who do not meet the stated inclusion criteria (no MBI at baseline) are excluded, I utilized the filter function to remove participants who had MCI onset before baseline. I included the NA participants since they have yet to have a MCI onset. 
@@ -186,12 +186,40 @@ There are `r nrow(MCI_baseline_df)` subjects and `r ncol(MCI_baseline_df)` varia
 
 The average baseline age is `r MCI_baseline_df |> pull(current_age) |> mean()` years. 
 
-The proportion of women in the study who is an APOE4 carrier is `r nrow(filter(MCI_baseline_df, sex == "Female", apoe4 == "APOE4 carrier"))`/`r nrow(filter(MCI_baseline_df, sex == "Female"))` or `r nrow(filter(MCI_baseline_df, sex == "Female", apoe4 == "APOE4 carrier")) / nrow(filter(MCI_baseline_df, sex == "Female"))`. 
+The proportion of women in the study who is an APOE4 carrier is `r nrow(filter(MCI_baseline_df, sex == "Female", apoe4 == "APOE4_carrier"))`/`r nrow(filter(MCI_baseline_df, sex == "Female"))` or `r nrow(filter(MCI_baseline_df, sex == "Female", apoe4 == "APOE4_carrier")) / nrow(filter(MCI_baseline_df, sex == "Female"))`. 
 
+Importing MCI Amyloid dataset:
 
+```{r, message = F}
+MCI_amyloid_df = 
+  read_csv(
+    file = "data/mci_amyloid.csv",
+    skip = 1, 
+    na = c("", "NA", ".")
+    ) |> 
+  janitor::clean_names() |>
+  rename(id = study_id)
+```
 
+I imported the CSV file, standardized missing values, and skipped the first line in the dataset. Similarly to the baseline dataset, I also skipped the first row of the dataset since it was providing codebook information. I then renamed the `Study ID` column to `ID` to match the baseline dataset. 
 
+The dataset provides information about the Alzheimer's biomarker, amyloid beta 42/40. There are `r nrow(MCI_amyloid_df)` subjects and `r ncol(MCI_amyloid_df)` variables in the amyloid dataset. The dataset include variables such as `id`, `baseline`, `time_2`, `time_4`, `time_6`, `time_8`. The timepoints show the biomarkers present at different points time. 
 
+There are `r anti_join(MCI_amyloid_df, MCI_baseline_df, by = "id") |> nrow()` participants that appear in the amyloid dataset but not in the baseline dataset. 
 
+There are `r anti_join(MCI_baseline_df, MCI_amyloid_df, by = "id") |> nrow()` participants that appear in the baseline dataset but not in the amyloid dataset. 
 
+Now, the two datasets are combined: 
+
+```{r}
+MCI_combined_df = inner_join(MCI_amyloid_df, MCI_baseline_df, by = "id") 
+```
+
+There are `r nrow(MCI_combined_df)` rows and `r ncol(MCI_combined_df)` columns in the combined dataset. Important variables include `id`, `sex`, `education`, `apoe4`, `current_age`, `age_at_onset` and biomarker variables at different timepoints including at baseline. 
+
+Exporting Final CSV file: 
+
+```{r}
+write_csv(MCI_combined_df, "data/MCI_combined.csv")
+```
 
