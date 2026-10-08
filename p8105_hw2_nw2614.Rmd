@@ -203,7 +203,7 @@ MCI_amyloid_df =
 
 I imported the CSV file, standardized missing values, and skipped the first line in the dataset. Similarly to the baseline dataset, I also skipped the first row of the dataset since it was providing codebook information. I then renamed the `Study ID` column to `ID` to match the baseline dataset. 
 
-The dataset provides information about the Alzheimer's biomarker, amyloid beta 42/40. There are `r nrow(MCI_amyloid_df)` subjects and `r ncol(MCI_amyloid_df)` variables in the amyloid dataset. The dataset include variables such as `id`, `baseline`, `time_2`, `time_4`, `time_6`, `time_8`. The timepoints show the biomarkers present at different points time. 
+The dataset provides information about the Alzheimer's biomarker, amyloid beta 42/40. There are `r nrow(MCI_amyloid_df)` subjects and `r ncol(MCI_amyloid_df)` variables in the amyloid dataset. The dataset include variables such as `id`, `baseline`, `time_2`, `time_4`, `time_6`, `time_8`. The timepoints show the biomarkers present at different points in time. 
 
 There are `r anti_join(MCI_amyloid_df, MCI_baseline_df, by = "id") |> nrow()` participants that appear in the amyloid dataset but not in the baseline dataset. 
 
