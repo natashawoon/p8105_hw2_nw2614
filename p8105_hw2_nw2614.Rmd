@@ -156,10 +156,31 @@ Now, we combine the datasets.
 trash_wheel_combined = bind_rows(mr_trashwheel_df, prof_trashwheel_df, gwyn_trashwheel_df)
 ```
 
-Once the three trash wheel datasets were combined, there are now `r nrow(trash_wheel_combined)` observations and `r ncol(trash_wheel_combined)` rows. The variables include `dumpster`, `month`, `year`, `date`, `weight_tons`, `volume_cubic_yards`, `plastic_bottles`, `polystyrene`, `cigaretts_butts`, `glass_bottles`, `plastic_bags`, `wrappers`, `sports_balls`, `homes_powered` and `wheel_name`. The key variables are essentially the point in time in which the data is collected, the type of trash collected, and the name of the wheel. 
+Once the three trash wheel datasets were combined, there are now `r nrow(trash_wheel_combined)` observations and `r ncol(trash_wheel_combined)` columns. The variables include `dumpster`, `month`, `year`, `date`, `weight_tons`, `volume_cubic_yards`, `plastic_bottles`, `polystyrene`, `cigaretts_butts`, `glass_bottles`, `plastic_bags`, `wrappers`, `sports_balls`, `homes_powered` and `wheel_name`. The key variables are essentially the point in time in which the data is collected, the type of trash collected, and the name of the wheel. 
 
 For the available data, the total weight of trash collected by Professor Trash Wheel is `r trash_wheel_combined |> filter(wheel_name == "prof_trash_wheel") |> pull(weight_tons) |> sum()` tons. 
 
 The total number of cigarette butts collected by Gwynda in June of 2022 is `r trash_wheel_combined |> filter(wheel_name == "gwyn_trash_wheel", month == "June", year == 2022) |> pull(cigarette_butts) |> sum() |> format(scientific = FALSE)`. 
+
+# Problem 3
+
+Import, clean, and tidy the dataset of baseline characteristics for Problem 3. 
+
+```{r}
+MCI_baseline_df = 
+  read_csv(
+    file = "data/MCI_baseline.csv",
+    skip = 1, 
+    na = c("", "NA", ".")
+    ) |> 
+  janitor::clean_names() |>
+  mutate(
+    sex = recode(sex, `1` = "Male", `0` = "Female"),
+    apoe4 = recode(apoe4, `1` = "APOE4 carrier", `0` = "APOE4 non-carrier")) |>
+  filter(is.na(age_at_onset) | age_at_onset>current_age) 
+```
+
+I imported the CSV file into R Studio. I then skipped the first line of the CSV file since it was details about the codebook. Then, I standardized the NA variables. I then re coded the `sex` and `apoe4` variables from numeric into character variables based on the codebook provided in line 1 of the CSV file. To ensure that participants who do not meet the stated inclusion criteria (no MBI at baseline) are excluded, I utilized the filter function to remove participants who had MCI onset before baseline. I included the NA participants since they have yet to have a MCI onset. 
+
 
 
