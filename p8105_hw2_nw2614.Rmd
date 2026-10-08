@@ -182,5 +182,16 @@ MCI_baseline_df =
 
 I imported the CSV file into R Studio. I then skipped the first line of the CSV file since it was details about the codebook. Then, I standardized the NA variables. I then re coded the `sex` and `apoe4` variables from numeric into character variables based on the codebook provided in line 1 of the CSV file. To ensure that participants who do not meet the stated inclusion criteria (no MBI at baseline) are excluded, I utilized the filter function to remove participants who had MCI onset before baseline. I included the NA participants since they have yet to have a MCI onset. 
 
+There are `r nrow(MCI_baseline_df)` subjects and `r ncol(MCI_baseline_df)` variables. The variables include `id`, `current_age`, `sex`, `education`, `apoe4`, and `age_at_onset`. There were `r nrow(MCI_baseline_df)` participants who were recruited, of which `r filter(MCI_baseline_df, !is.na(age_at_onset)) |> nrow()` developed MCI. 
+
+The average baseline age is `r MCI_baseline_df |> pull(current_age) |> mean()` years. 
+
+The proportion of women in the study who is an APOE4 carrier is `r nrow(filter(MCI_baseline_df, sex == "Female", apoe4 == "APOE4 carrier"))`/`r nrow(filter(MCI_baseline_df, sex == "Female"))` or `r nrow(filter(MCI_baseline_df, sex == "Female", apoe4 == "APOE4 carrier")) / nrow(filter(MCI_baseline_df, sex == "Female"))`. 
+
+
+
+
+
+
 
 
