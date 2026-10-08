@@ -6,15 +6,16 @@ output: github_document
 ---
 
 Load Packages
-```{r}
+```{r, message = F}
 library(tidyverse)
+library(readxl)
 ```
 
 # Problem 1 
 
 Importing CSV File
 
-```{r}
+```{r, message = F}
 subway_df = 
   read_csv(file = "data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
            na = c("", "NA", ".")) |> 
@@ -35,8 +36,7 @@ There were originally other variables in the dataset. I only selected the variab
 
 No, the original data import is not tidy. The `route1` through `route11` variables are all in separate columns instead of being within one column but separated by row. This means that these columns are values and not variable names. 
 
-How many distinct stations are there? Note that stations are identified both by name and by line (e.g. 125th St 8th Avenue; 125st Broadway; 125st Lenox); the distinct function may be useful here.
-
+*How many distinct stations are there?*
 
 ```{r}
 subway_df |>
@@ -46,7 +46,8 @@ subway_df |>
 
 There are 465 distinct stations. 
 
-How many stations are ADA compliant?
+*How many stations are ADA compliant?* 
+
 ```{r}
 subway_df |>
   filter(ada == TRUE) |>
@@ -56,7 +57,7 @@ subway_df |>
 
 There are 84 stations that are ADA compliant. 
 
-What proportion of station entrances / exits without vending allow entrance?
+*What proportion of station entrances / exits without vending allow entrance?*
 
 ```{r}
 subway_df |> 
@@ -72,8 +73,93 @@ subway_df |>
 There are 183 stations without vending. Out of these 183 stations, 69 stations allow entrance. 
 
 
-Reformat data so that route number and route name are distinct variables. How many distinct stations serve the A train? Of the stations that serve the A train, how many are ADA compliant?
+Reformatting the data so that route number and route name are distinct variables. 
 
+```{r}
+subway_tidy_df = 
+subway_df |>
+  mutate(across(c(route8, route9, route10, route11), as.character)) |>
+  pivot_longer(
+    route1:route11,
+    names_to = "route_number",
+    names_prefix = "route",
+    values_to = "route_name"
+  )
+```
 
+*How many distinct stations serve the A train?*
+
+```{r}
+subway_tidy_df |>
+  filter(route_name == "A") |>
+  distinct(station_name, line) |>
+  nrow()
+```
+
+60 stations serve the A train. 
+
+*Of the stations that serve the A train, how many are ADA compliant?*
+
+```{r}
+subway_tidy_df |>
+  filter(route_name == "A", ada == TRUE) |> 
+  distinct(line, station_name) |>
+  nrow() 
+```
+
+Of the stations that serve the A train, 17 are ADA compliant. 
+
+# Problem 2
+
+Read, clean, and name the wheel variables for the Mr Trashwheel dataset. Also utilize the mutate function to convert character variables to numeric variables. 
+
+```{r, warning = F}
+mr_trashwheel_df =
+  read_excel(path = "data/202610 Trash Wheel Collection Data.xlsx",
+             sheet = "Mr. Trash Wheel",
+             range = "A2:N742",
+             na = c("", "NA", ".")) |>
+  janitor::clean_names() |>
+  mutate(sports_balls = as.integer(sports_balls),
+         year = as.numeric(year),
+         wheel_name = "mr_trash_wheel")
+```
+
+Read, clean, and name the wheel variables for the Professor Trashwheel dataset. Also utilize the mutate function to convert character variables to numeric variables.
+
+```{r, warning = F}
+prof_trashwheel_df = 
+  read_excel(path = "data/202610 Trash Wheel Collection Data.xlsx",
+             sheet = "Professor Trash Wheel",
+             range = "A2:M139",
+             na = c("", "NA", ".")) |>
+  janitor::clean_names() |>
+  mutate(wheel_name = "prof_trash_wheel",
+         plastic_bottles = as.numeric(plastic_bottles))
+```
+
+Read, clean, and name the wheel variables for the Gwynnda dataset.
+
+```{r, warning = F}
+gwyn_trashwheel_df = 
+  read_excel(path = "data/202610 Trash Wheel Collection Data.xlsx", 
+             sheet = "Gwynnda the Good Wheel of the W", 
+             range = "A2:L394",
+             na = c("", "NA", ".")) |>
+  janitor::clean_names() |>
+  mutate(wheel_name = "gwyn_trash_wheel")
+```
+
+Now, we combine the datasets. 
+
+```{r}
+trash_wheel_combined = bind_rows(mr_trashwheel_df, prof_trashwheel_df, gwyn_trashwheel_df)
+```
+
+Once the three trash wheel datasets were combined, there are now `r nrow(trash_wheel_combined)` observations and `r ncol(trash_wheel_combined)` rows. The variables include `dumpster`, `month`, `year`, `date`, `weight_tons`, `volume_cubic_yards`, `plastic_bottles`, `polystyrene`, `cigaretts_butts`, `glass_bottles`, `plastic_bags`, `wrappers`, `sports_balls`, `homes_powered` and `wheel_name`. The key variables are essentially the point in time in which the data is collected, the type of trash collected, and the name of the wheel. 
+
+For the available data, the total weight of trash collected by Professor Trash Wheel is `r trash_wheel_combined |> filter(wheel_name == "prof_trash_wheel") |> pull(weight_tons) |> sum()` tons. 
+
+The total number of cigarette butts collected by Gwynda in June of 2022 is `r trash_wheel_combined |> filter(wheel_name == "gwyn_trash_wheel", month == "June", year == 2022) |> pull(cigarette_butts) |> sum() |> format(scientific = FALSE)`. 
 
 
